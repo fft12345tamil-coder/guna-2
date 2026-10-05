@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday Surprise 🎉</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', 'Comic Sans MS', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #feada6 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.45);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 30px;
+      max-width: 450px;
+      width: 100%;
+      position: relative;
+    }
+
+    h1 {
+      color: #d63384;
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    p.subtitle {
+      color: #555;
+      font-size: 1rem;
+      margin-bottom: 25px;
+    }
+
+    /* Page 1 Styles */
+    .cake-container {
+      margin: 20px auto;
+      cursor: pointer;
+      font-size: 80px;
+      transition: transform 0.3s ease;
+      position: relative;
+    }
+
+    .cake-container:hover {
+      transform: scale(1.1);
+    }
+
+    .flame {
+      font-size: 30px;
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: flicker 0.5s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 1; transform: translateX(-50%) scale(1); }
+      100% { opacity: 0.7; transform: translateX(-50%) scale(1.2); }
+    }
+
+    .gift-box {
+      font-size: 60px;
+      cursor: pointer;
+      margin-top: 15px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-15px); }
+      60% { transform: translateY(-7px); }
+    }
+
+    .card {
+      display: none;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      animation: fadeIn 1s ease-in-out forwards;
+    }
+
+    .person-img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #ff6b81;
+      margin-bottom: 15px;
+    }
+
+    .message {
+      color: #333;
+      font-size: 1.1rem;
+      line-height: 1.5;
+    }
+
+    .instruction {
+      font-size: 0.85rem;
+      color: #777;
+      margin-top: 5px;
+    }
+
+    /* Page 2: Balloon Game Styles */
+    #page2 {
+      display: none;
+    }
+
+    .balloon-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 25px;
+      justify-items: center;
+    }
+
+    .balloon-wrapper {
+      position: relative;
+      width: 80px;
+      height: 110px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .balloon {
+      width: 75px;
+      height: 95px;
+      border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+      cursor: pointer;
+      position: absolute;
+      z-index: 2;
+      transition: transform 0.2s, opacity 0.3s;
+      box-shadow: inset -8px -8px 15px rgba(0,0,0,0.1);
+    }
+
+    .balloon::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 14px;
+      background: #777;
+    }
+
+    .b1 { background-color: #ff80ab; }
+    .b2 { background-color: #80deea; }
+    .b3 { background-color: #ffe082; }
+    .b4 { background-color: #b39ddb; }
+
+    .popped {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(1.4);
+    }
+
+    .hidden-word {
+      position: absolute;
+      z-index: 1;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #d63384;
+    }
+
+    .next-arrow-btn {
+      display: none;
+      margin: 25px auto 0;
+      width: 50px;
+      height: 50px;
+      background: #d63384;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(214, 51, 132, 0.4);
+      transition: all 0.3s ease;
+      animation: pulse 1.5s infinite;
+    }
+
+    .next-arrow-btn:hover {
+      background: #b02a6b;
+      transform: scale(1.1);
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(214, 51, 132, 0.6); }
+      70% { box-shadow: 0 0 0 15px rgba(214, 51, 132, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(214, 51, 132, 0); }
+    }
+
+    /* Page 3: Cake Page Styles */
+    #page3 {
+      display: none;
+    }
+
+    .cake-box {
+      font-size: 100px;
+      cursor: pointer;
+      margin: 30px auto;
+      position: relative;
+      display: inline-block;
+      transition: transform 0.3s;
+    }
+
+    .cake-box:hover {
+      transform: scale(1.05);
+    }
+
+    /* Popup Message */
+    .wish-popup {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.95);
+      padding: 25px 35px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      z-index: 10;
+      width: 80%;
+      animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .wish-popup h2 {
+      color: #ad1457;
+      font-size: 1.5rem;
+      line-height: 1.4;
+    }
+
+    /* Page 4: Bouquet Page Styles */
+    #page4 {
+      display: none;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .bouquet-container {
+      position: relative;
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .bouquet-img {
+      width: 200px;
+      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .chat-bubble {
+      background: #ffffff;
+      padding: 10px 15px;
+      border-radius: 15px;
+      font-size: 0.85rem;
+      color: #880e4f;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin: 8px 0;
+      display: inline-block;
+      animation: slideIn 0.5s ease-out forwards;
+      max-width: 80%;
+    }
+
+    /* Teddy Bear Button Styles */
+    .teddy-btn {
+      font-size: 70px;
+      cursor: pointer;
+      margin-top: 15px;
+      display: inline-block;
+      transition: transform 0.3s ease;
+      animation: bounce 2s infinite;
+      user-select: none;
+    }
+
+    .teddy-btn:hover {
+      transform: scale(1.2) rotate(5deg);
+    }
+
+    /* Page 5: Letter Page Styles */
+    #page5 {
+      display: none;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    h1.title {
+      color: #d63384;
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+    }
+
+    p.tap-hint {
+      color: #777;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+
+    .envelope-container {
+      cursor: pointer;
+      margin: 20px auto;
+      transition: transform 0.3s ease;
+    }
+
+    .envelope-container:hover {
+      transform: scale(1.05);
+    }
+
+    .envelope {
+      width: 220px;
+      height: 140px;
+      background: #f8d7da;
+      position: relative;
+      margin: 0 auto;
+      border-radius: 5px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .envelope::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-left: 110px solid transparent;
+      border-right: 110px solid transparent;
+      border-top: 80px solid #f1b0b7;
+      transform-origin: top;
+      transition: transform 0.4s ease;
+      z-index: 3;
+    }
+
+    .envelope-open::before {
+      transform: rotateX(180deg);
+      z-index: 1;
+    }
+
+    .envelope-flap-text {
+      position: absolute;
+      top: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      z-index: 4;
+    }
+
+    /* BACKGROUND PHOTO ADDED HERE */
+    .letter-card {
+      display: none;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.82)), url('letter-bg.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      max-height: 320px;
+      overflow-y: auto;
+      text-align: left;
+      animation: fadeIn 0.8s ease-in-out forwards;
+    }
+
+    .letter-card::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .letter-card::-webkit-scrollbar-thumb {
+      background: #ffb6c1;
+      border-radius: 10px;
+    }
+
+    .letter-message {
+      color: #111;
+      font-size: 0.95rem;
+      font-weight: 600;
+      line-height: 1.6;
+      white-space: pre-line;
+      border-right: 2px solid #d63384;
+      animation: blink 0.75s step-end infinite;
+      text-shadow: 0px 0px 3px rgba(255, 255, 255, 0.9);
+    }
+
+    .big-heart-container {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+      animation: fadeIn 0.8s ease-in-out forwards;
+    }
+
+    .big-heart-btn {
+      font-size: 75px;
+      cursor: pointer;
+      display: inline-block;
+      transition: transform 0.2s ease;
+      animation: pulse 1.5s infinite;
+      user-select: none;
+    }
+
+    .big-heart-btn:active {
+      transform: scale(0.85);
+    }
+
+    .click-instruction {
+      font-size: 0.9rem;
+      color: #d63384;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    /* Page 6: Video Player Page Styles */
+    #page6 {
+      display: none;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .video-wrapper {
+      margin-top: 15px;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      border: 3px solid #ff6b81;
+      background: #000;
+    }
+
+    video {
+      width: 100%;
+      height: auto;
+      max-height: 450px;
+      display: block;
+      border-radius: 12px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes blink {
+      from, to { border-color: transparent }
+      50% { border-color: #d63384; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- PAGE 1: Intro Card -->
+    <div id="page1">
+      <h1 id="recipient-name">Happy Birthday Azhagu! 🎈</h1>
+      <p class="subtitle">Birthday Surprise!</p>
+
+      <div class="cake-container" onclick="blowCandle1()">
+        <span class="flame" id="candle-flame1">🔥</span>
+        🎂
+        <p class="instruction" id="cake-hint1">CLICK THE CAKE AND BLOW OUT THE CANDLE !</p>
+      </div>
+
+      <div class="gift-box" id="gift-box" style="display:none;" onclick="openSurprise()">
+        🎁
+        <p class="instruction">CLICK THE BUTTON FOR SURPRISE!</p>
+      </div>
+
+      <div class="card" id="surprise-card">
+        <img id="person-photo" class="person-img" src="macha.jpeg" alt="Birthday Person">
+        <p class="message" id="wish-message">HAPPY BIRTHDAY MAYILEH AND STAY BLESSED WOW WITH ME! 💖</p>
+      </div>
+
+      <button id="next-page-btn1" class="next-arrow-btn" onclick="goToPage2()">➔</button>
+    </div>
+
+    <!-- PAGE 2: Balloon Pop Game -->
+    <div id="page2">
+      <h1>Pop all 4 balloons 🎈</h1>
+      <p class="subtitle">Tap each balloon to reveal the secret message!</p>
+
+      <div class="balloon-grid">
+        <div class="balloon-wrapper">
+          <span class="hidden-word">You</span>
+          <div class="balloon b1" onclick="popBalloon(this)"></div>
+        </div>
+        <div class="balloon-wrapper">
+          <span class="hidden-word">are</span>
+          <div class="balloon b2" onclick="popBalloon(this)"></div>
+        </div>
+        <div class="balloon-wrapper">
+          <span class="hidden-word">so</span>
+          <div class="balloon b3" onclick="popBalloon(this)"></div>
+        </div>
+        <div class="balloon-wrapper">
+          <span class="hidden-word">special ✨</span>
+          <div class="balloon b4" onclick="popBalloon(this)"></div>
+        </div>
+      </div>
+
+      <button id="next-page-btn2" class="next-arrow-btn" onclick="goToPage3()">➔</button>
+    </div>
+
+    <!-- PAGE 3: Candle Blow Page -->
+    <div id="page3">
+      <h1>Blow the candle, MAYILEHH 🎀 🕯️</h1>
+
+      <div class="cake-box" onclick="blowCandle2()">
+        <span id="candle-flame2" class="flame">🔥</span>
+        🎂
+      </div>
+
+      <p style="color: #777; font-size: 0.9rem;">Touch the cake to blow out!</p>
+    </div>
+
+    <!-- POPUP MESSAGE -->
+    <div id="wish-popup" class="wish-popup">
+      <h2>Close your eyes<br>& make a wish ✨</h2>
+    </div>
+
+    <!-- PAGE 4: Rose Bouquet Page -->
+    <div id="page4">
+      <h1>Your Rose Bouquet 💐</h1>
+
+      <div class="bouquet-container">
+        <img class="bouquet-img" src="https://cdn-icons-png.flaticon.com/512/3461/3461822.png" alt="Rose Bouquet">
+        
+        <div class="chat-bubble">You make the world beautiful ✨</div>
+        <div class="chat-bubble">Happy Birthday KD 🎉</div>
+        <div class="chat-bubble">Stay happy always 💖</div>
+      </div>
+
+      <!-- Teddy Bear Icon Button -->
+      <div class="teddy-btn" onclick="goToPage5()">
+        🧸
+        <p class="instruction">TOUCH THE TEDDY FOR A SURPRISE MESSAGE! ❤️</p>
+      </div>
+    </div>
+
+    <!-- PAGE 5: Heart Envelope Message -->
+    <div id="page5">
+      <h1 class="title">A Message From My Heart</h1>
+      <p class="tap-hint" id="envelope-hint">Tap to open</p>
+
+      <div class="envelope-container" onclick="openEnvelope()">
+        <div class="envelope" id="envelope-box">
+          <div class="envelope-flap-text">💌</div>
+        </div>
+      </div>
+
+      <div class="letter-card" id="letter-card">
+        <p class="letter-message" id="typed-text"></p>
+      </div>
+
+      <!-- Big Heart Section for 5-time Click -->
+      <div class="big-heart-container" id="big-heart-section">
+        <div class="big-heart-btn" onclick="handleHeartClick()">❤️</div>
+        <p class="click-instruction" id="click-counter-text">Click this heart 5 times for a special surprise video! 💖 (0/5)</p>
+      </div>
+    </div>
+
+    <!-- PAGE 6: Video Surprise Page -->
+    <div id="page6">
+      <h1>Special Surprise For You! 🐿️💖</h1>
+      <p class="subtitle">A cute moment just for you ✨</p>
+      
+      <div class="video-wrapper">
+        <video id="surprise-video" controls playsinline>
+          <source src="video.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // URL Params Setup
+    const urlParams = new URLSearchParams(window.location.search);
+    const name = urlParams.get('name') || "Azhagu";
+    const message = urlParams.get('message') || "HAPPY BIRTHDAY MAYILEH AND STAY BLESSED WOW WITH ME! 💖";
+    const photo = urlParams.get('photo') || "macha.jpeg";
+
+    document.getElementById('recipient-name').innerText = `Happy Birthday ${name}! 🎉`;
+    document.getElementById('wish-message').innerText = message;
+    document.getElementById('person-photo').src = photo;
+
+    // Page 1 Actions
+    function blowCandle1() {
+      const flame = document.getElementById('candle-flame1');
+      if (flame.style.display !== 'none') {
+        flame.style.display = 'none';
+        document.getElementById('cake-hint1').innerText = "SURPRISE! 🎉";
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        document.getElementById('gift-box').style.display = 'block';
+      }
+    }
+
+    function openSurprise() {
+      document.getElementById('gift-box').style.display = 'none';
+      document.getElementById('surprise-card').style.display = 'block';
+      document.getElementById('next-page-btn1').style.display = 'block';
+      confetti({ particleCount: 150, spread: 100, origin: { y: 0.4 } });
+    }
+
+    function goToPage2() {
+      document.getElementById('page1').style.display = 'none';
+      document.getElementById('page2').style.display = 'block';
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.5 } });
+    }
+
+    // Page 2 Actions (Balloon Pop)
+    let poppedCount = 0;
+    function popBalloon(element) {
+      if (!element.classList.contains('popped')) {
+        element.classList.add('popped');
+        poppedCount++;
+        confetti({ particleCount: 40, spread: 50, origin: { y: 0.6 } });
+
+        if (poppedCount === 4) {
+          setTimeout(() => {
+            confetti({ particleCount: 200, spread: 100, origin: { y: 0.4 } });
+            document.getElementById('next-page-btn2').style.display = 'block';
+          }, 300);
+        }
+      }
+    }
+
+    function goToPage3() {
+      document.getElementById('page2').style.display = 'none';
+      document.getElementById('page3').style.display = 'block';
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.5 } });
+    }
+
+    // Page 3 Actions
+    function blowCandle2() {
+      const flame = document.getElementById('candle-flame2');
+      if (flame.style.display !== 'none') {
+        flame.style.display = 'none';
+
+        confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+
+        setTimeout(() => {
+          document.getElementById('wish-popup').style.display = 'block';
+        }, 500);
+
+        setTimeout(() => {
+          document.getElementById('wish-popup').style.display = 'none';
+          document.getElementById('page3').style.display = 'none';
+          document.getElementById('page4').style.display = 'block';
+
+          confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
+        }, 3500);
+      }
+    }
+
+    // Page 4 -> Page 5 Transition via Teddy Bear Touch
+    function goToPage5() {
+      document.getElementById('page4').style.display = 'none';
+      document.getElementById('page5').style.display = 'block';
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.5 } });
+    }
+
+    // Page 5 Letter Logic
+    const fullText = `Happy Birthday en thangomeyy!! ❤
+
+En life-la nee vandhadhula irundhu, enakku happiness-na enna nu innum azhaga purinjukitten. Nee enakku just oru person illa chlww, nee en heart-ku romba special-aana oru feeling.
+
+Un kooda pesura ovvoru moment-um, sirikkura ovvoru second-um enakku romba precious. Sometimes words-la solla mudiyadha alavukku unna care panren, love panren.
+
+Un life-la evlo kashtam vandhalum, naan un pakkathula irukkanum nu dhaan always wish panren. Un face-la irukkura andha cute smile eppovume apdiye irukkanum!
+
+Happy Birthday once again thangowww!
+Un dreams ellam nijamaaganum, unakku pidicha maari beautiful-ah life irukkanum.
+
+And most importantly... nee eppovume happy-ah irukkanum, because your happiness means a lot to me.
+
+Love you so much KD! ✨`;
+
+    let textIndex = 0;
+    function typeWriter() {
+      if (textIndex < fullText.length) {
+        document.getElementById("typed-text").innerHTML += fullText.charAt(textIndex);
+        textIndex++;
+        setTimeout(typeWriter, 40);
+      } else {
+        document.getElementById('big-heart-section').style.display = 'block';
+      }
+    }
+
+    function openEnvelope() {
+      const envelope = document.getElementById('envelope-box');
+      const letterCard = document.getElementById('letter-card');
+      const hint = document.getElementById('envelope-hint');
+
+      if (!envelope.classList.contains('envelope-open')) {
+        envelope.classList.add('envelope-open');
+        hint.style.display = 'none';
+        
+        setTimeout(() => {
+          letterCard.style.display = 'block';
+          confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+          typeWriter();
+        }, 300);
+      }
+    }
+
+    // 5-Times Heart Click Logic
+    let heartClickCount = 0;
+    function handleHeartClick() {
+      if (heartClickCount < 5) {
+        heartClickCount++;
+        confetti({ particleCount: 30 * heartClickCount, spread: 50 + (heartClickCount * 10), origin: { y: 0.7 } });
+        
+        document.getElementById('click-counter-text').innerText = `Click this heart 5 times for a special surprise video! 💖 (${heartClickCount}/5)`;
+
+        if (heartClickCount === 5) {
+          setTimeout(() => {
+            confetti({ particleCount: 200, spread: 100, origin: { y: 0.4 } });
+            document.getElementById('page5').style.display = 'none';
+            document.getElementById('page6').style.display = 'block';
+            
+            // Auto Play Video
+            const video = document.getElementById('surprise-video');
+            video.play().catch(e => console.log("Autoplay restricted:", e));
+          }, 500);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
